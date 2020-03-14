@@ -28,13 +28,8 @@ class Main1
 
 		def calc rentals
 			rentals.each do |rental|
-				rental.price = calc_price rental
+				rental.price = Service.calc_price rental
 			end
-		end
-
-		def calc_price rental
-			return 0 unless car = rental.car
-			rental.days * car.price_per_day + rental.distance * car.price_per_km
 		end
 	end
 end
