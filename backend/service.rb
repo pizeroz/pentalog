@@ -7,10 +7,13 @@ module Service
 			data = JSON.parse(file)
 
 			cars = data['cars'].map { |c| Car.new c['id'], c['price_per_day'], c['price_per_km'] }
+			options = data['options'].nil? ? [] : data['options'].map { |o| Option.new o['id'], o['rental_id'], o['type'] }
 
 			data['rentals'].map do |r|
-				car = cars.find { |c| c.id == r['car_id'] }
-				Rental.new r['id'], r['start_date'], r['end_date'], r['distance'], car
+				rental = Rental.new r['id'], r['start_date'], r['end_date'], r['distance']
+				rental.car = cars.find { |c| c.id == r['car_id'] }
+				rental.options = options.select { |o| o.rental_id == rental.id }
+				rental
 			end
 		rescue
 			[]
@@ -59,6 +62,21 @@ module Service
 		drivy_fee = total_fee - insurance_fee - assistance_fee
 		owner_fee = rental.price - total_fee
 
+		if options = rental.options
+			options.each do |option|
+				rental.price += case option.type.to_sym
+				when *Business::OWNER_OPTIONS.keys
+					ex_fee = rental.days * Business::OWNER_OPTIONS[option.type.to_sym] * Business::EX_RATE_EUR_CENT
+					owner_fee += ex_fee
+					ex_fee
+				when *Business::DRYVY_OPTIONS.keys
+					ex_fee = rental.days * Business::DRYVY_OPTIONS[option.type.to_sym] * Business::EX_RATE_EUR_CENT
+					drivy_fee += ex_fee
+					ex_fee
+				end
+			end
+		end
+
 		Commission.new total_fee.round, insurance_fee.round, assistance_fee.round, drivy_fee.round, owner_fee.round
 	end
 end
@@ -86,6 +104,16 @@ module Business
 	COMMISSION = {
 		total_fee: 0.3, #30% price
 		insurance_fee: 0.5, #50% total
-		assistance_fee: 1 #1€/day goes to the roadside
+		assistance_fee: 1 #€/day goes to the roadside
+	}
+
+	# L5
+	OWNER_OPTIONS = {
+		gps: 5, #€/day, all the money goes to the owner
+		baby_seat: 2 #€/day, all the money goes to the owner
+	}
+
+	DRYVY_OPTIONS = {
+		additional_insurance: 10 #€/day, all the money goes to Getaround
 	}
 end

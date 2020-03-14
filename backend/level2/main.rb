@@ -6,10 +6,15 @@ class Main2
 	include Business
 
 	class << self
-		def run
-			rentals = Service.json_file_to_object './data/input.json'
-			result = hash_result rentals
-			Service.hash_result_to_file result, './data/output.json'
+		def run input, output
+			begin
+				rentals = Service.json_file_to_object input
+				result = hash_result rentals
+				Service.hash_result_to_file result, output
+				puts 'The calculation was successful! Please check the result in ' + output
+			rescue
+				puts 'Something went wrong!'
+			end
 		end
 
 		private
@@ -35,4 +40,4 @@ class Main2
 	end
 end
 
-Main2.run
+Main2.run './data/input.json', './data/output.json'
