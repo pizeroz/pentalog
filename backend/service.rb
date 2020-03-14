@@ -23,3 +23,21 @@ module Service
 		end
 	end
 end
+
+module Business
+	# L2
+	DECREASING = [
+		{
+			after_day: 1,
+			percent: 0.1
+		},
+		{
+			after_day: 4,
+			percent: 0.3
+		},
+		{
+			after_day: 10,
+			percent: 0.5
+		}
+	]
+end
