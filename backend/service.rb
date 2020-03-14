@@ -40,4 +40,13 @@ module Business
 			percent: 0.5
 		}
 	]
+
+	# L3
+	EX_RATE_EUR_CENT = 100
+	
+	COMMISSION = {
+		total: 0.3, #30% price
+		insurance_fee: 0.5, #50% total
+		assistance_fee: 1 #1€/day goes to the roadside
+	}
 end
